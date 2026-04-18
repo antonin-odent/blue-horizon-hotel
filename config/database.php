@@ -1,5 +1,4 @@
 <?php
-// db.php
 require_once __DIR__ . '/config.php';
 
 function getPDO(): PDO {
@@ -10,7 +9,6 @@ function getPDO(): PDO {
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
-            // En dev : afficher l'erreur ; en prod : logger et afficher un message générique
             die('Erreur de connexion à la base de données.');
         }
     }
