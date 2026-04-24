@@ -1,0 +1,599 @@
+/* ============================================================
+   BLUE HORIZON HOTEL — style.css
+   Inspiration : Equinox Hotels (dark luxury, editorial, refined)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap');
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+  --noir:        #0a0a0a;
+  --noir-doux:   #111111;
+  --gris-fonce:  #1a1a1a;
+  --gris-moyen:  #2e2e2e;
+  --gris-clair:  #888888;
+  --blanc:       #f5f3ef;
+  --or:          #c9a84c;
+  --or-clair:    #e2c97e;
+  --blanc-pur:   #ffffff;
+
+  --font-titre:  'Cormorant Garamond', Georgia, serif;
+  --font-corps:  'Montserrat', sans-serif;
+
+  --transition:  0.35s ease;
+  --ombre:       0 8px 40px rgba(0,0,0,0.5);
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--noir);
+  color: var(--blanc);
+  font-family: var(--font-corps);
+  font-weight: 300;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── Header ────────────────────────────────────────────────── */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%);
+  backdrop-filter: blur(2px);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.hotel-ville {
+  font-family: var(--font-corps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: var(--blanc);
+  text-transform: uppercase;
+}
+
+nav {
+  display: flex;
+  gap: 40px;
+}
+
+nav a {
+  font-family: var(--font-corps);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  transition: color var(--transition);
+  position: relative;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--or);
+  transition: width var(--transition);
+}
+
+nav a:hover {
+  color: var(--blanc-pur);
+}
+
+nav a:hover::after {
+  width: 100%;
+}
+
+.btn-book {
+  font-family: var(--font-corps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--noir) !important;
+  background: var(--blanc-pur);
+  padding: 12px 28px;
+  transition: background var(--transition), color var(--transition);
+}
+
+.btn-book:hover {
+  background: var(--or);
+  color: var(--noir) !important;
+}
+
+.btn-book::after {
+  display: none !important;
+}
+
+/* ── Hero (index.php) ──────────────────────────────────────── */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background: url('../images/hero.jpg') center center / cover no-repeat;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.52);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 1.2s ease both;
+}
+
+.hero-content h1 {
+  font-family: var(--font-titre);
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
+  color: var(--blanc-pur);
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.btn-hero {
+  display: inline-block;
+  font-family: var(--font-corps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--blanc-pur);
+  border: 1px solid rgba(255,255,255,0.6);
+  padding: 16px 44px;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.btn-hero:hover {
+  background: var(--or);
+  border-color: var(--or);
+  color: var(--noir);
+}
+
+/* ── Page hero (autres pages) ──────────────────────────────── */
+.page-hero {
+  position: relative;
+  padding: 0;
+  height: 60vh;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  background: url('../images/chambres.jpg') center center / cover no-repeat;
+  border-bottom: 1px solid var(--gris-moyen);
+}
+
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.52);
+}
+
+.page-hero h1 {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-titre);
+  font-size: clamp(2rem, 5vw, 5rem);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blanc-pur);
+  animation: fadeUp 1.2s ease both;
+}
+
+/* ── Grille chambres (chambres.php) ────────────────────────── */
+.grille-chambres {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2px;
+  padding: 2px;
+  background: var(--gris-moyen);
+}
+
+.card-chambre {
+  position: relative;
+  overflow: hidden;
+  background: var(--noir-doux);
+  cursor: pointer;
+}
+
+.card-chambre img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+  filter: brightness(0.85);
+}
+
+.card-chambre:hover img {
+  transform: scale(1.04);
+  filter: brightness(0.7);
+}
+
+.card-corps {
+  padding: 28px 32px 36px;
+  border-top: 1px solid var(--gris-moyen);
+}
+
+.card-corps h2 {
+  font-family: var(--font-titre);
+  font-size: 1.6rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--blanc-pur);
+  margin-bottom: 6px;
+}
+
+.card-corps p {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--gris-clair);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.card-corps .prix {
+  font-family: var(--font-titre);
+  font-size: 1.3rem;
+  color: var(--or);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  margin: 10px 0 18px;
+}
+
+.card-corps .desc {
+  font-size: 13px;
+  color: var(--gris-clair);
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.btn-card {
+  display: inline-block;
+  font-family: var(--font-corps);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--blanc-pur);
+  border-bottom: 1px solid var(--or);
+  padding-bottom: 3px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.btn-card:hover {
+  color: var(--or);
+}
+
+/* ── Détail chambre (chambre.php) ──────────────────────────── */
+.detail-chambre {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: calc(100vh - 80px);
+  margin-top: 80px;
+}
+
+.detail-media {
+  overflow: hidden;
+}
+
+.detail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 500px;
+  filter: brightness(0.9);
+  transition: transform 0.8s ease;
+}
+
+.detail-img:hover {
+  transform: scale(1.02);
+}
+
+.detail-info {
+  padding: 80px 64px;
+  background: var(--noir-doux);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.detail-info h1 {
+  font-family: var(--font-titre);
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--blanc-pur);
+  line-height: 1.2;
+}
+
+.detail-meta {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gris-clair);
+}
+
+.detail-prix {
+  font-family: var(--font-titre);
+  font-size: 2rem;
+  color: var(--or);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+.detail-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.8;
+  border-left: 2px solid var(--or);
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.detail-info p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.05em;
+}
+
+.detail-info strong {
+  color: var(--blanc);
+  font-weight: 500;
+}
+
+.detail-info .btn-book {
+  align-self: flex-start;
+  margin-top: 16px;
+  color: var(--noir) !important;
+}
+
+/* ── Formulaire réservation (reservation.php) ──────────────── */
+.formulaire-section {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 80px 32px 120px;
+}
+
+.formulaire-section form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formulaire-section input,
+.formulaire-section select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--gris-moyen);
+  color: var(--blanc-pur);
+  font-family: var(--font-corps);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  padding: 14px 4px;
+  outline: none;
+  transition: border-color var(--transition);
+  appearance: none;
+}
+
+.formulaire-section input::placeholder {
+  color: var(--gris-clair);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.formulaire-section input:focus,
+.formulaire-section select:focus {
+  border-bottom-color: var(--or);
+}
+
+.formulaire-section select option {
+  background: var(--gris-fonce);
+  color: var(--blanc-pur);
+}
+
+.formulaire-section button {
+  margin-top: 20px;
+  align-self: flex-start;
+  font-family: var(--font-corps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--noir);
+  background: var(--blanc-pur);
+  border: none;
+  padding: 16px 44px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+
+.formulaire-section button:hover {
+  background: var(--or);
+  color: var(--noir);
+}
+
+/* ── Confirmation (confirmation.php) ───────────────────────── */
+.confirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100vh;
+  padding: 48px;
+  gap: 24px;
+  background: radial-gradient(ellipse at center, var(--gris-fonce) 0%, var(--noir) 70%);
+}
+
+.confirmation h1 {
+  font-family: var(--font-titre);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: var(--or);
+  text-transform: uppercase;
+}
+
+.confirmation p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.08em;
+  max-width: 480px;
+}
+
+.confirmation .btn-book {
+  margin-top: 16px;
+}
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer {
+  background: var(--noir-doux);
+  border-top: 1px solid var(--gris-moyen);
+  padding: 32px 48px;
+  text-align: center;
+}
+
+footer p {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gris-clair);
+}
+
+/* ── Animation ─────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .detail-chambre {
+    grid-template-columns: 1fr;
+  }
+  .detail-img {
+    min-height: 400px;
+  }
+  .detail-info {
+    padding: 48px 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-top {
+    padding: 18px 24px;
+  }
+
+  nav {
+    display: none;
+  }
+
+  .page-hero {
+    padding: 120px 24px 60px;
+  }
+
+  .grille-chambres {
+    grid-template-columns: 1fr;
+  }
+
+  .formulaire-section {
+    padding: 60px 24px 80px;
+  }
+
+  .formulaire-section button {
+    width: 100%;
+    text-align: center;
+  }
+
+  footer {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .detail-info {
+    padding: 36px 24px;
+  }
+
+  .detail-info .btn-book {
+    width: 100%;
+    text-align: center;
+  }
+}
+/* ── Message d'erreur formulaire ───────────────────────────── */
+.form-erreur {
+  border-left: 3px solid #c0392b;      /* Barre rouge à gauche pour attirer l'attention */
+  background: rgba(192, 57, 43, 0.1);  /* Fond rouge très transparent */
+  color: #e74c3c;                       /* Texte rouge pour signaler l'erreur */
+  padding: 14px 20px;                  /* Espacement interne pour aérer le message */
+  font-size: 13px;                     /* Taille de police cohérente avec le reste du formulaire */
+  letter-spacing: 0.08em;             /* Espacement des lettres dans le style du site */
+  margin-bottom: 24px;                 /* Espace entre le message et le formulaire */
+}
