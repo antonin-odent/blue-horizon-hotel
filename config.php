@@ -1,4 +1,6 @@
 <?php
+// config.php
+// Remplacez les valeurs par celles de votre environnement
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'blue_horizon_hotel');
 define('DB_USER', 'root');
