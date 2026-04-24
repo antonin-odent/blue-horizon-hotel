@@ -1,124 +1,95 @@
 <?php
 // Active l'affichage des erreurs PHP (utile en développement)
 ini_set('display_errors', 1);
-// Signale toutes les erreurs PHP
 error_reporting(E_ALL);
 
-// Inclut le fichier de connexion à la base de données
-require_once __DIR__ . '/database.php';
-// Crée la connexion PDO
-$pdo = getPDO();
+// Connexion via config.php (UNIQUE source de connexion)
+require_once __DIR__ . '/config.php'; 
+$pdo = $conn; // Harmonisation : $pdo = $conn
 
-// Variable qui contiendra le message d'erreur à afficher dans la page
+// Variable qui contiendra le message d'erreur
 $erreur = null;
 
-// Récupère l'ID de chambre depuis l'URL si présent et valide (pré-sélection depuis chambre.php)
+// Récupère l'ID de chambre depuis l'URL si présent
 $preselect_id = isset($_GET['id']) && ctype_digit($_GET['id']) ? (int)$_GET['id'] : null;
 
-// Prépare la requête pour récupérer les chambres disponibles pour le <select>
+// Récupère les chambres disponibles
 $stmt = $pdo->prepare("SELECT id_chambre, nom_chambre, prix_chambre FROM chambre WHERE disponibilite_chambre = 1 ORDER BY id_chambre ASC");
-// Exécute la requête sans paramètres
 $stmt->execute();
-// Récupère toutes les chambres disponibles dans un tableau associatif
 $chambres = $stmt->fetchAll();
 
-// Traitement du formulaire uniquement si la méthode HTTP est POST
+// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Liste des champs obligatoires du formulaire
+
     $required = ['id_chambre','nom','prenom','email','date_arrivee','date_depart','nb_personne'];
-    // Vérifie que chaque champ requis est bien rempli
     foreach ($required as $f) {
         if (empty($_POST[$f])) {
-            // Stocke le message d'erreur sans couper la page
             $erreur = 'Champ manquant : ' . htmlspecialchars($f, ENT_QUOTES);
         }
     }
 
-    // Continue le traitement seulement s'il n'y a pas déjà une erreur de champ manquant
     if (!$erreur) {
-        // Caste l'ID chambre en entier pour sécuriser la requête
         $id_chambre   = (int) $_POST['id_chambre'];
-        // Supprime les espaces inutiles autour du nom
         $nom          = trim($_POST['nom']);
-        // Supprime les espaces inutiles autour du prénom
         $prenom       = trim($_POST['prenom']);
-        // Valide et nettoie l'adresse email
         $email        = filter_var(trim($_POST['email']), FILTER_VALIDATE_EMAIL);
-        // Récupère la date d'arrivée
         $date_arrivee = $_POST['date_arrivee'];
-        // Récupère la date de départ
         $date_depart  = $_POST['date_depart'];
-        // Caste le nombre de personnes en entier
         $nb_personne  = (int) $_POST['nb_personne'];
 
         if (!$email) {
-            // Stocke l'erreur si l'email est invalide
             $erreur = 'Email invalide.';
         } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_arrivee) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_depart)) {
-            // Stocke l'erreur si le format de date ne correspond pas à AAAA-MM-JJ
             $erreur = 'Format de date invalide.';
         } elseif ($date_depart <= $date_arrivee) {
-            // Stocke l'erreur si la date de départ n'est pas après la date d'arrivée
             $erreur = 'La date de départ doit être après la date d\'arrivée.';
         } else {
             try {
-                // Démarre une transaction pour garantir l'intégrité des données
                 $pdo->beginTransaction();
 
-                // Vérifie que la chambre existe bien en base de données
+                // Vérifie que la chambre existe
                 $stmt = $pdo->prepare("SELECT id_chambre FROM chambre WHERE id_chambre = ?");
-                // Exécute la vérification avec l'ID de la chambre
                 $stmt->execute([$id_chambre]);
                 if (!$stmt->fetch()) {
-                    // Annule la transaction si la chambre est introuvable
                     $pdo->rollBack();
-                    // Stocke l'erreur chambre introuvable
                     $erreur = 'Chambre introuvable.';
                 } else {
-                    // Vérifie qu'il n'y a pas de réservation qui chevauche les dates demandées
+                    // Vérifie les chevauchements
                     $check = $pdo->prepare("
                         SELECT COUNT(*) AS cnt FROM reservation
                         WHERE id_chambre = ?
                           AND NOT (date_depart <= ? OR date_arrivee >= ?)
                     ");
-                    // Exécute la vérification de disponibilité sur les dates choisies
                     $check->execute([$id_chambre, $date_arrivee, $date_depart]);
-                    // Récupère le résultat du comptage
                     $row = $check->fetch();
 
                     if ($row && (int)$row['cnt'] > 0) {
-                        // Annule la transaction si la chambre est déjà réservée sur ces dates
                         $pdo->rollBack();
-                        // Stocke l'erreur de conflit de dates
                         $erreur = 'La chambre est déjà réservée sur ces dates.';
                     } else {
-                        // Insère la nouvelle réservation en base de données
+                        // Insère la réservation
                         $insert = $pdo->prepare("
                             INSERT INTO reservation (id_chambre, nom, prenom, email, date_arrivee, date_depart, nb_personne)
                             VALUES (?, ?, ?, ?, ?, ?, ?)
                         ");
-                        // Exécute l'insertion avec toutes les données validées
                         $insert->execute([$id_chambre, $nom, $prenom, $email, $date_arrivee, $date_depart, $nb_personne]);
-                        // Récupère l'ID de la réservation nouvellement créée
+
                         $reservationId = $pdo->lastInsertId();
-                        // Valide la transaction : toutes les opérations ont réussi
                         $pdo->commit();
-                        // Redirige vers la page de confirmation avec l'ID de réservation
+
                         header('Location: confirmation.php?id=' . $reservationId);
-                        // Seul exit légitime : la réservation a été créée avec succès
                         exit;
                     }
                 }
             } catch (Exception $e) {
-                // Annule la transaction en cas d'exception si elle est encore active
                 if ($pdo->inTransaction()) $pdo->rollBack();
-                // Stocke le message d'erreur serveur sécurisé
                 $erreur = 'Erreur serveur : ' . htmlspecialchars($e->getMessage(), ENT_QUOTES);
             }
         }
     }
 }
 ?>
+
 
 <!DOCTYPE html> <!-- Déclare le type de document HTML5 -->
 <html lang="fr"> <!-- Définit la langue de la page en français -->
