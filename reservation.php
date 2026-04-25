@@ -48,7 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($nb_nuits > 0) {
             $total = $nb_nuits * $prix_chambre;
         }
-        // ------------------------
 
         if (!$email) {
             $erreur = 'Email invalide.';

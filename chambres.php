@@ -1,5 +1,5 @@
 <?php
-// chambres.php
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -7,7 +7,6 @@ require_once __DIR__ . '/config.php';
 $pdo = $conn;
 
 
-// Récupérer les chambres disponibles
 $stmt = $pdo->prepare("
     SELECT id_chambre, nom_chambre, prix_chambre, type_chambre, capacite_chambre, description_chambre
     FROM chambre
@@ -17,7 +16,6 @@ $stmt = $pdo->prepare("
 $stmt->execute();
 $chambres = $stmt->fetchAll();
 
-// Correspondance type_chambre → image
 $images = [
     'chambre simple'         => 'images/simple.jpg',
     'suite double'         => 'images/balcon.jpg',
@@ -58,7 +56,6 @@ $images = [
         <?php else: ?>
             <?php foreach ($chambres as $chambre): ?>
                 <?php
-                    // Choisir l'image selon le type (insensible à la casse)
                     $type = strtolower(trim($chambre['type_chambre']));
                     $image = $images[$type] ?? 'images/default.jpg';
                     $alt   = htmlspecialchars($chambre['nom_chambre']);

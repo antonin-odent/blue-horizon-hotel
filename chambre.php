@@ -49,14 +49,12 @@ if (!$chambre) {
 
 <section class="detail-chambre">
 
-    <!-- IMAGE UNIQUE (remplace le carrousel) -->
     <div class="detail-media">
         <img src="<?php echo htmlspecialchars($chambre['image_chambre']); ?>"
              alt="Image de la chambre"
              class="detail-img">
     </div>
 
-    <!-- INFOS -->
     <div class="detail-info">
 
         <h1><?php echo htmlspecialchars($chambre['nom_chambre']); ?></h1>
