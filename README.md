@@ -5,7 +5,7 @@ Projet réalisé dans le cadre du BTS SIO SLAM — 1ère année.
 Site web de réservation de chambres en ligne pour l'hôtel Blue Horizon Hotel, permettant aux clients de consulter les chambres disponibles et d'effectuer une réservation enregistrée en base de données.
 
 ---
-
+ 
 ## Membres du groupe
 
 Antonin ODENT-ALLET
