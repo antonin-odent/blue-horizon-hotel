@@ -83,7 +83,7 @@ if (!$chambre) {
 </section>
 
 <footer>
-    <p>123 Avenue de la Mer, Paris — 01 23 45 67 89</p>
+    <p>9447 Cambridge Road Far Rockaway, NY 11691 | 07 67 75 63 23 | contact@bluehorizon.fr</p>
 </footer>
 
 </body>
