@@ -1,24 +1,20 @@
 <?php
-// Active l'affichage des erreurs PHP (utile en développement)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Connexion via config.php (UNIQUE source de connexion)
 require_once __DIR__ . '/config.php'; 
-$pdo = $conn; // Harmonisation : $pdo = $conn
+$pdo = $conn;
 
-// Variable qui contiendra le message d'erreur
 $erreur = null;
+$total = null;
+$nb_nuits = null;
 
-// Récupère l'ID de chambre depuis l'URL si présent
 $preselect_id = isset($_GET['id']) && ctype_digit($_GET['id']) ? (int)$_GET['id'] : null;
 
-// Récupère les chambres disponibles
 $stmt = $pdo->prepare("SELECT id_chambre, nom_chambre, prix_chambre FROM chambre WHERE disponibilite_chambre = 1 ORDER BY id_chambre ASC");
 $stmt->execute();
 $chambres = $stmt->fetchAll();
 
-// Traitement du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $required = ['id_chambre','nom','prenom','email','date_arrivee','date_depart','nb_personne'];
@@ -37,6 +33,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date_depart  = $_POST['date_depart'];
         $nb_personne  = (int) $_POST['nb_personne'];
 
+        // --- CALCUL DU TOTAL ---
+        $date1 = new DateTime($date_arrivee);
+        $date2 = new DateTime($date_depart);
+        $nb_nuits = $date1->diff($date2)->days;
+
+        foreach ($chambres as $c) {
+            if ((int)$c['id_chambre'] === $id_chambre) {
+                $prix_chambre = (float)$c['prix_chambre'];
+                break;
+            }
+        }
+
+        if ($nb_nuits > 0) {
+            $total = $nb_nuits * $prix_chambre;
+        }
+        // ------------------------
+
         if (!$email) {
             $erreur = 'Email invalide.';
         } elseif (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_arrivee) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date_depart)) {
@@ -47,14 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $pdo->beginTransaction();
 
-                // Vérifie que la chambre existe
                 $stmt = $pdo->prepare("SELECT id_chambre FROM chambre WHERE id_chambre = ?");
                 $stmt->execute([$id_chambre]);
                 if (!$stmt->fetch()) {
                     $pdo->rollBack();
                     $erreur = 'Chambre introuvable.';
                 } else {
-                    // Vérifie les chevauchements
                     $check = $pdo->prepare("
                         SELECT COUNT(*) AS cnt FROM reservation
                         WHERE id_chambre = ?
@@ -67,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $pdo->rollBack();
                         $erreur = 'La chambre est déjà réservée sur ces dates.';
                     } else {
-                        // Insère la réservation
                         $insert = $pdo->prepare("
                             INSERT INTO reservation (id_chambre, nom, prenom, email, date_arrivee, date_depart, nb_personne)
                             VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -91,64 +101,72 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
-<!DOCTYPE html> <!-- Déclare le type de document HTML5 -->
-<html lang="fr"> <!-- Définit la langue de la page en français -->
+<!DOCTYPE html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8"> <!-- Définit l'encodage des caractères en UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Rend la page responsive sur mobile -->
-    <title>Réservation - Blue Horizon Hotel</title> <!-- Titre affiché dans l'onglet du navigateur -->
-    <link rel="stylesheet" href="css/hotel.css"> <!-- Lien vers la feuille de style principale -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation - Blue Horizon Hotel</title>
+    <link rel="stylesheet" href="css/hotel.css">
 </head>
-<body> <!-- Début du contenu visible de la page -->
+<body>
 
-    <header> <!-- En-tête du site -->
-        <div class="header-top"> <!-- Conteneur de la barre de navigation -->
-            <span class="hotel-ville">PARIS</span> <!-- Affiche la ville de l'hôtel -->
-            <nav> <!-- Barre de navigation principale -->
-                <a href="index.php">ACCUEIL</a> <!-- Lien vers la page d'accueil -->
-                <a href="chambres.php">CHAMBRES</a> <!-- Lien vers la page des chambres -->
-                <a href="reservation.php">RÉSERVER</a> <!-- Lien vers la page de réservation -->
-            </nav>
-            <a href="reservation.php" class="btn-book">RÉSERVER</a> <!-- Bouton de réservation rapide -->
-        </div>
-    </header>
+<header>
+    <div class="header-top">
+        <span class="hotel-ville">PARIS</span>
+        <nav>
+            <a href="index.php">ACCUEIL</a>
+            <a href="chambres.php">CHAMBRES</a>
+            <a href="reservation.php">RÉSERVER</a>
+        </nav>
+        <a href="reservation.php" class="btn-book">RÉSERVER</a>
+    </div>
+</header>
 
-    <section class="page-hero"> <!-- Section bannière en haut de page -->
-        <h1>RÉSERVER UNE CHAMBRE</h1> <!-- Titre principal de la page -->
-    </section>
+<section class="page-hero">
+    <h1>RÉSERVER UNE CHAMBRE</h1>
+</section>
 
-    <section class="formulaire-section"> <!-- Section contenant le formulaire de réservation -->
+<section class="formulaire-section">
 
-        <?php if ($erreur): ?> <!-- Affiche le bloc d'erreur seulement si une erreur existe -->
-            <p class="form-erreur"><?= $erreur ?></p> <!-- Message d'erreur stylisé dans la page -->
-        <?php endif; ?> <!-- Fin de la condition d'affichage de l'erreur -->
+    <?php if ($erreur): ?>
+        <p class="form-erreur"><?= $erreur ?></p>
+    <?php endif; ?>
 
-        <form method="POST" action="reservation.php"> <!-- Formulaire envoyé en POST vers la même page -->
-            <input type="text" name="nom" placeholder="Nom" required> <!-- Champ obligatoire pour le nom -->
-            <input type="text" name="prenom" placeholder="Prénom" required> <!-- Champ obligatoire pour le prénom -->
-            <input type="email" name="email" placeholder="Email" required> <!-- Champ obligatoire pour l'email avec validation HTML -->
+    <?php if ($total !== null): ?>
+        <p style="font-size:18px; color:var(--or); letter-spacing:0.12em; margin-bottom:20px;">
+            Séjour de <strong><?= $nb_nuits ?></strong> nuit(s) — 
+            Total : <strong><?= number_format($total, 2, ',', ' ') ?> €</strong>
+        </p>
+    <?php endif; ?>
 
-            <!-- Liste déroulante des chambres disponibles avec présélection automatique si venu de chambre.php -->
-            <select name="id_chambre" required> <!-- Sélecteur de chambre obligatoire -->
-                <option value="">-- Choisir une chambre --</option> <!-- Option par défaut non sélectionnable -->
-                <?php foreach ($chambres as $c): ?> <!-- Boucle sur chaque chambre disponible -->
-                    <option value="<?= (int)$c['id_chambre'] ?>"
-                        <?= ($preselect_id === (int)$c['id_chambre']) ? 'selected' : '' ?>> <!-- Présélectionne la chambre si l'ID correspond à celui de l'URL -->
-                        <?= htmlspecialchars($c['nom_chambre']) ?> — <?= number_format((float)$c['prix_chambre'], 2, '.', ' ') ?> EUR/nuit <!-- Affiche le nom et le prix formaté de la chambre -->
-                    </option>
-                <?php endforeach; ?> <!-- Fin de la boucle sur les chambres -->
-            </select>
+    <form method="POST" action="reservation.php">
+        <input type="text" name="nom" placeholder="Nom" required>
+        <input type="text" name="prenom" placeholder="Prénom" required>
+        <input type="email" name="email" placeholder="Email" required>
 
-            <input type="date" name="date_arrivee" required> <!-- Champ obligatoire pour la date d'arrivée -->
-            <input type="date" name="date_depart" required> <!-- Champ obligatoire pour la date de départ -->
-            <input type="number" name="nb_personne" placeholder="Nombre de personnes" min="1" required> <!-- Champ obligatoire pour le nombre de personnes, minimum 1 -->
-            <button type="submit">CONFIRMER LA RÉSERVATION</button> <!-- Bouton de soumission du formulaire -->
-        </form>
-    </section>
+        <select name="id_chambre" required>
+            <option value="">-- Choisir une chambre --</option>
+            <?php foreach ($chambres as $c): ?>
+                <option value="<?= (int)$c['id_chambre'] ?>"
+                    <?= ($preselect_id === (int)$c['id_chambre']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($c['nom_chambre']) ?> — 
+                    <?= number_format((float)$c['prix_chambre'], 2, ',', ' ') ?> €/nuit
+                </option>
+            <?php endforeach; ?>
+        </select>
 
-    <footer> <!-- Pied de page du site -->
-        <p>123 Avenue de la Mer, Paris | 01 23 45 67 89 | contact@bluehorizon.fr</p> <!-- Coordonnées de l'hôtel -->
-    </footer>
+        <input type="date" name="date_arrivee" required>
+        <input type="date" name="date_depart" required>
+        <input type="number" name="nb_personne" placeholder="Nombre de personnes" min="1" required>
 
-</body> <!-- Fin du contenu visible -->
-</html> <!-- Fin du document HTML -->
+        <button type="submit">CONFIRMER LA RÉSERVATION</button>
+    </form>
+</section>
+
+<footer>
+    <p>123 Avenue de la Mer, Paris | 01 23 45 67 89 | contact@bluehorizon.fr</p>
+</footer>
+
+</body>
+</html>
